@@ -1,5 +1,5 @@
 [project]
-name = "complex-number-sqrt"
+name = "complex-roots-visualizer"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
