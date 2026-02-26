@@ -5,29 +5,34 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def get_roots(r: float, theta: float, n: int) -> Tuple[np.ndarray, float]:
+def get_roots(r: float, theta: float, n: int, verbose: bool = True) -> Tuple[np.ndarray, float]:
     """
     calculates the n-th roots of a complex number given by r * e^(i * theta).
     """
     r_n = r ** (1 / n)
     roots = []
 
-    print(f"\ncalculated {n} roots of z = {r:.3f} * e^(i * {theta:.3f}):")
+    if verbose:
+        print(f"\ncalculated {n} roots of z = {r:.3f} * e^(i * {theta:.3f}):")
     for k in range(n):
         angle = (theta + 2 * k * np.pi) / n
         root = r_n * np.exp(1j * angle)
         roots.append(root)
-        print(
-            f"k = {k}: \t{root.real:+.3f} {root.imag:+.3f}i \t(r = {r_n:.3f}, angle = {angle:.3f} rad)"
-        )
+        if verbose:
+            print(
+                f"k = {k}: \t{root.real:+.3f} {root.imag:+.3f}i \t(r = {r_n:.3f}, angle = {angle:.3f} rad)"
+            )
 
     return np.array(roots), r_n
 
 
-def plot_complex_roots(r: float, theta: float, n: int) -> None:
-    roots, r_n = get_roots(r, theta, n)
+def plot_complex_roots(r: float, theta: float, n: int, save: bool = True, fig=None, ax=None):
+    roots, r_n = get_roots(r, theta, n, verbose=save)
 
-    fig, ax = plt.subplots(figsize=(6, 6))
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(figsize=(6, 6))
+    else:
+        ax.clear()
 
     circle = plt.Circle(
         (0, 0), r_n, color="gray", fill=False, linestyle="-", linewidth=1, alpha=0.5
@@ -94,14 +99,17 @@ def plot_complex_roots(r: float, theta: float, n: int) -> None:
     plt.title(rf"The {n} roots of $z = {r:g} e^{{i {theta / np.pi:.3g} \pi}}$")
     plt.tight_layout()
 
-    output_filename = "complex_roots.png"
-    plt.savefig(output_filename, dpi=300, bbox_inches="tight")
-    print(f"\nPlot saved to '{output_filename}'")
+    if save:
+        output_filename = "complex_roots.png"
+        plt.savefig(output_filename, dpi=300, bbox_inches="tight")
+        print(f"\nPlot saved to '{output_filename}'")
 
-    import matplotlib
+        import matplotlib
 
-    if matplotlib.get_backend().lower() != "agg":
-        plt.show()
+        if matplotlib.get_backend().lower() != "agg":
+            plt.show()
+
+    return fig
 
 
 if __name__ == "__main__":
