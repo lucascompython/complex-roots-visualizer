@@ -2,4 +2,6 @@
 
 The *n*th roots of a complex number are equally spaced on a circle centered at the origin in the complex plane. They form the vertices of a regular n-gon (for cube roots, an equilateral triangle).
 
+Interactive website made with [PyScript](https://pyscript.net/): https://lucascompython.github.io/complex-roots-visualizer/
+
 ![demonstration of the cube roots of unity](./complex_roots.png)
