@@ -235,57 +235,60 @@
 
     <script type="py">
         from pyscript import document
-        from pyodide.ffi import create_proxy
+        from pyodide.ffi import create_proxy, to_js
         import matplotlib.pyplot as plt
         import numpy as np
-        import io
-        import base64
         import main
-        
+
         fig, ax = plt.subplots(figsize=(6, 6))
+
+        plot_div = document.getElementById("plot-output")
+        plot_div.innerHTML = '<canvas id="plot-canvas"></canvas>'
+        canvas = document.getElementById("plot-canvas")
+        ctx = canvas.getContext("2d")
+
 
         def update_labels():
             r = float(document.getElementById("r-input").value)
             theta_pi = float(document.getElementById("theta-input").value)
             n = int(document.getElementById("n-input").value)
-            
+
             document.getElementById("r-val").innerText = f"{r:.1f}"
             document.getElementById("theta-val").innerText = f"{theta_pi:.2f}π"
             document.getElementById("n-val").innerText = str(n)
-            
+
             return r, theta_pi * np.pi, n
+
 
         def update_plot(*args, **kwargs):
             r, theta, n = update_labels()
-            
+
             main.plot_complex_roots(r, theta, n, save=False, fig=fig, ax=ax)
-            
-            buf = io.BytesIO()
-            fig.savefig(buf, format="png", dpi=90)
-            buf.seek(0)
-            img_b64 = base64.b64encode(buf.read()).decode("utf-8")
-            
-            img_el = document.getElementById("plot-img")
-            if not img_el:
-                plot_div = document.getElementById("plot-output")
-                plot_div.innerHTML = f'<img id="plot-img" src="data:image/png;base64,{img_b64}" style="max-width: 100%; height: auto; border-radius: 12px;"/>'
-            else:
-                img_el.src = f"data:image/png;base64,{img_b64}"
-            
-            loader = document.getElementById("loader")
-            if loader and loader.style.opacity != "0":
-                loader.style.opacity = "0"
-                from pyodide.ffi.wrappers import set_timeout
-                def hide_loader():
-                    loader.style.display = "none"
-                set_timeout(hide_loader, 500)
+
+            fig.canvas.draw()
+
+            width, height = fig.canvas.get_width_height()
+            canvas.width = width
+            canvas.height = height
+
+            buf = np.frombuffer(fig.canvas.buffer_rgba(), dtype=np.uint8)
+
+            image_data = ctx.createImageData(width, height)
+            image_data.data.set(to_js(buf))
+            ctx.putImageData(image_data, 0, 0)
+
 
         proxy_update = create_proxy(update_plot)
         document.getElementById("r-input").addEventListener("input", proxy_update)
         document.getElementById("theta-input").addEventListener("input", proxy_update)
         document.getElementById("n-input").addEventListener("input", proxy_update)
 
+        loader = document.getElementById("loader")
+        if loader:
+            loader.style.display = "none"
+
         update_plot()
+
     </script>
 </body>
 
