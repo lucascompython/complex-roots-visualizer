@@ -146,6 +146,12 @@
             align-items: center;
         }
 
+        #plot-output canvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
         #plot-output img {
             max-width: 100%;
             height: auto;
@@ -241,6 +247,7 @@
         import main
 
         fig, ax = plt.subplots(figsize=(6, 6))
+        artists = main.init_plot(fig, ax)
 
         plot_div = document.getElementById("plot-output")
         plot_div.innerHTML = '<canvas id="plot-canvas"></canvas>'
@@ -260,10 +267,14 @@
             return r, theta_pi * np.pi, n
 
 
-        def update_plot(*args, **kwargs):
+        def update_plot(*args):
             r, theta, n = update_labels()
 
-            main.plot_complex_roots(r, theta, n, save=False, fig=fig, ax=ax)
+            main.update_plot_artists(r, theta, n, artists, ax)
+
+            #container_width = plot_div.clientWidth or 400
+            #size_px = min(container_width, 600)
+            #fig.set_size_inches(size_px / fig.dpi, size_px / fig.dpi)
 
             fig.canvas.draw()
 
@@ -279,6 +290,7 @@
 
 
         proxy_update = create_proxy(update_plot)
+
         document.getElementById("r-input").addEventListener("input", proxy_update)
         document.getElementById("theta-input").addEventListener("input", proxy_update)
         document.getElementById("n-input").addEventListener("input", proxy_update)
